@@ -587,13 +587,17 @@ often?
 Alright, now we have a better strategy, let's _improve_ it!
 
 The next strategy we'll implement is "if the bot sees that its opponent can
-win in the next move, it'll __block__ its opponent from winning".
+win in their next move, it'll __block__ its opponent from winning".
 
 Your task for exercise 4 is to implement `losing_moves` within
 `tic_tac_toe_exercises_lib.ml`.
 
-> HINT: A "losing move" is a "winning move" for your opponent after all. You
-> might find `Piece.flip` useful!
+> HINT: A "losing move" is a move that let's your opponent win in the next move
+> "winning move" for your opponent after all. You might find `Piece.flip`
+> useful!
+
+> HINT: You might need to "look 1" step into the future. What will be your
+> opponents game state after you've made your move.
 
 When you're done, uncomment the expect tests and move on to exercise 4.2. Also,
 remember to commit+push!
