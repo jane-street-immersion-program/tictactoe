@@ -69,11 +69,8 @@ let uno_reverse_card =
   Vdom.Node.img
     ~attrs:
       [ Vdom.Attr.src uno_reverse_card_jpeg
-      ; Style.homepage_painting
-      ; Vdom.Attr.create
-          "alt"
-          "Dalle image of animals/robots playing tictactoe or going to \
-           groceries"
+      ; Style.uno_reverse_card
+      ; Vdom.Attr.create "alt" "Uno reverse card"
       ]
     ()
 ;;

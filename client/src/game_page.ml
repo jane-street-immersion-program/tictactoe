@@ -171,6 +171,7 @@ let render_board ~(game_state : Game_state.t Value.t) =
   | false -> Vdom.Node.div ~attrs:[ game_board_attribute ] cells
   | true ->
     View.hbox
+      ~gap:(`Rem 1.0)
       [ Vdom.Node.div ~attrs:[ game_board_attribute ] cells
       ; Images.uno_reverse_card
       ]
