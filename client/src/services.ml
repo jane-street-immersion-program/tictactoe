@@ -149,7 +149,7 @@ let is_flipped ~game_id =
     Rpc_effect.Rpc.poll
       ~where_to_connect:Self
       ~equal_query:[%equal: Game_id.t]
-      ~every:(Time_ns.Span.of_sec 1.0)
+      ~every:(Time_ns.Span.of_sec 0.1)
       Is_flipped.rpc
       game_id
   in
