@@ -20,6 +20,7 @@ val take_turn
     Computation.t
 
 val is_thinking : game_id:Game_id.t Value.t -> bool Computation.t
+val is_flipped : game_id:Game_id.t Value.t -> bool Computation.t
 
 val start_services
   :  random_image:Images.t

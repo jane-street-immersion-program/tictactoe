@@ -143,6 +143,20 @@ let is_thinking ~game_id =
   Option.value_map ~default:false last_ok_response ~f:Tuple2.get2
 ;;
 
+let is_flipped ~game_id =
+  let open Bonsai.Let_syntax in
+  let%sub { last_ok_response; _ } =
+    Rpc_effect.Rpc.poll
+      ~where_to_connect:Self
+      ~equal_query:[%equal: Game_id.t]
+      ~every:(Time_ns.Span.of_sec 1.0)
+      Is_flipped.rpc
+      game_id
+  in
+  let%arr last_ok_response = last_ok_response in
+  Option.value_map ~default:false last_ok_response ~f:Tuple2.get2
+;;
+
 let start_services ~random_image computation =
   let open Bonsai.Let_syntax in
   let%sub () =

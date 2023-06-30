@@ -34,3 +34,4 @@ val take_turn
   -> Take_turn.Response.t Deferred.t
 
 val is_thinking : t -> game_id:Game_id.t -> bool
+val is_flipped : t -> game_id:Game_id.t -> bool

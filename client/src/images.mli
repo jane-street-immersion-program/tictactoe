@@ -12,3 +12,4 @@ type t =
 val src : t -> string
 val description : t -> string
 val vdom : t -> Vdom.Node.t
+val uno_reverse_card : Vdom.Node.t

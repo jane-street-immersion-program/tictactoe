@@ -190,6 +190,10 @@ module Is_thinking : sig
   val rpc : (Game_id.t, bool) Rpc.Rpc.t
 end
 
+module Is_flipped : sig
+  val rpc : (Game_id.t, bool) Rpc.Rpc.t
+end
+
 module List_all_joinable_games : sig
   val rpc : (unit, Joinable_game.t Game_id.Map.t) Rpc.Rpc.t
 end
@@ -222,6 +226,7 @@ module World_state : sig
   type t =
     { joinable_games : Joinable_game.t Game_id.Map.t
     ; running_games : Game_state.t Game_id.Map.t
+    ; flipped_games : Game_id.Set.t
     }
   [@@deriving bin_io, sexp_of, equal]
 

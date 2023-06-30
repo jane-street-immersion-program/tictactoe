@@ -92,6 +92,17 @@ let is_thinking ~global_state =
     State.is_thinking global_state ~game_id)
 ;;
 
+let is_flipped ~global_state =
+  Rpc.Rpc.implement'
+    Is_flipped.rpc
+    (fun (user_state : User_state.t) game_id ->
+    info
+      [%string
+        "%{user_state.user}  wants to know if game id '%{game_id#Game_id}' \
+         is flipped."];
+    State.is_flipped global_state ~game_id)
+;;
+
 let implementations ~global_state =
   Rpc.Implementations.create_exn
     ~implementations:
@@ -103,6 +114,7 @@ let implementations ~global_state =
       ; get_game ~global_state
       ; take_turn ~global_state
       ; is_thinking ~global_state
+      ; is_flipped ~global_state
       ]
     ~on_unknown_rpc:`Continue
 ;;

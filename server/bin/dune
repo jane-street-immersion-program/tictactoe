@@ -1,5 +1,5 @@
 (executables
- (names main send_mock_rpc)
+ (names main send_mock_rpc print_state)
  (preprocess
   (pps ppx_jane))
  (libraries

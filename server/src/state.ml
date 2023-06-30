@@ -10,7 +10,9 @@ type t =
   }
 
 let to_string_hum t =
-  let { World_state.running_games; joinable_games } = t.world_state in
+  let { World_state.running_games; joinable_games; flipped_games = _ } =
+    t.world_state
+  in
   let joinable_games =
     Sexp.to_string
       [%message (joinable_games : Joinable_game.t Game_id.Map.t)]
@@ -108,6 +110,7 @@ let start_joinable_game t ~second_player ~joinable_game =
   t.world_state
     <- { joinable_games = new_joinable_games
        ; running_games = new_running_games
+       ; flipped_games = t.world_state.flipped_games
        };
   Join_existing_game.Response.Ok
 ;;
@@ -162,6 +165,8 @@ let is_board_full ~game_kind pieces =
   all_positions_in_bound_invariant && is_board_full
 ;;
 
+let randomness = `Extra_move :: List.init 9 ~f:(fun _ -> `Flip)
+
 let compute_next_game_status pieces ~current_piece ~game_kind =
   match Traverse.did_piece_win ~piece:current_piece ~game_kind pieces with
   | Some positions ->
@@ -169,8 +174,16 @@ let compute_next_game_status pieces ~current_piece ~game_kind =
   | None ->
     (match is_board_full pieces ~game_kind with
      | true -> Game_status.Game_over { winner = None }
-     | false -> Game_status.Turn_of (Piece.flip current_piece))
+     | false ->
+       let next_piece =
+         match List.random_element_exn randomness with
+         | `Extra_move -> current_piece
+         | `Flip -> Piece.flip current_piece
+       in
+       Game_status.Turn_of next_piece)
 ;;
+
+let randomness = `Swap :: List.init 9 ~f:(fun _ -> `No_swap)
 
 let rec maybe_take_server_ai_turn t ~game_state : unit Deferred.t =
   match game_state.Game_state.game_status with
@@ -210,7 +223,7 @@ and actually_take_turn
   ~(game_state : Game_state.t)
   ~piece
   =
-  let new_running_game_after_next_move =
+  let new_running_game_after_next_move, new_flipped_games =
     let pieces =
       Map.add_exn game_state.Game_state.pieces ~key:position ~data:piece
     in
@@ -220,13 +233,27 @@ and actually_take_turn
         ~game_kind:game_state.game_kind
         pieces
     in
-    { Game_state.pieces
-    ; game_status
-    ; player_o = game_state.player_o
-    ; player_x = game_state.player_x
-    ; game_id = game_state.game_id
-    ; game_kind = game_state.game_kind
-    }
+    let player_o, player_x, new_flipped_games =
+      match List.random_element_exn randomness with
+      | `Swap ->
+        ( game_state.player_x
+        , game_state.player_o
+        , (match Set.mem t.world_state.flipped_games game_state.game_id with
+           | true ->
+             Set.remove t.world_state.flipped_games game_state.game_id
+           | false -> Set.add t.world_state.flipped_games game_state.game_id)
+        )
+      | `No_swap ->
+        game_state.player_o, game_state.player_x, t.world_state.flipped_games
+    in
+    ( { Game_state.pieces
+      ; game_status
+      ; player_o
+      ; player_x
+      ; game_id = game_state.game_id
+      ; game_kind = game_state.game_kind
+      }
+    , new_flipped_games )
   in
   let new_world_state =
     { t.world_state with
@@ -235,6 +262,7 @@ and actually_take_turn
           t.world_state.running_games
           ~key:game_id
           ~data:new_running_game_after_next_move
+    ; flipped_games = new_flipped_games
     }
   in
   t.world_state <- new_world_state;
@@ -283,3 +311,4 @@ let take_turn t ~game_id ~position ~username
 ;;
 
 let is_thinking t ~game_id = Set.mem t.thinking game_id
+let is_flipped t ~game_id = Set.mem t.world_state.flipped_games game_id

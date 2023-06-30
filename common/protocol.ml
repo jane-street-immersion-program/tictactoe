@@ -281,11 +281,15 @@ module World_state = struct
   type t =
     { joinable_games : Joinable_game.t Game_id.Map.t
     ; running_games : Game_state.t Game_id.Map.t
+    ; flipped_games : Game_id.Set.t
     }
   [@@deriving bin_io, sexp_of, equal]
 
   let empty =
-    { joinable_games = Game_id.Map.empty; running_games = Game_id.Map.empty }
+    { joinable_games = Game_id.Map.empty
+    ; running_games = Game_id.Map.empty
+    ; flipped_games = Game_id.Set.empty
+    }
   ;;
 end
 
@@ -303,6 +307,16 @@ module Is_thinking = struct
   let rpc =
     Rpc.Rpc.create
       ~name:"is-thinking"
+      ~version:0
+      ~bin_query:[%bin_type_class: Game_id.t]
+      ~bin_response:[%bin_type_class: bool]
+  ;;
+end
+
+module Is_flipped = struct
+  let rpc =
+    Rpc.Rpc.create
+      ~name:"is_flipped"
       ~version:0
       ~bin_query:[%bin_type_class: Game_id.t]
       ~bin_response:[%bin_type_class: bool]

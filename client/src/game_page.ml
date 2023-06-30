@@ -99,9 +99,17 @@ let render_board ~(game_state : Game_state.t Value.t) =
     { Position.row; column }
   in
   let%sub theme = View.Theme.current in
+  let%sub is_flipped =
+    let%sub game_id =
+      let%arr game_state = game_state in
+      game_state.game_id
+    in
+    Services.is_flipped ~game_id
+  in
   let%arr { game_kind; pieces; game_status; _ } = game_state
   and all_positions = all_positions
   and theme = theme
+  and is_flipped = is_flipped
   and maybe_take_turn_attr = maybe_take_turn_attr
   and is_it_my_turn = is_it_my_turn in
   let constants = View.constants theme in
@@ -159,7 +167,13 @@ let render_board ~(game_state : Game_state.t Value.t) =
           [ Style.game_cell; is_winning_game_cell; maybe_take_turn_attr ]
         [ content ])
   in
-  Vdom.Node.div ~attrs:[ game_board_attribute ] cells
+  match is_flipped with
+  | false -> Vdom.Node.div ~attrs:[ game_board_attribute ] cells
+  | true ->
+    View.hbox
+      [ Vdom.Node.div ~attrs:[ game_board_attribute ] cells
+      ; Images.uno_reverse_card
+      ]
 ;;
 
 let body ~game_id =
